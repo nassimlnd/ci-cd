@@ -125,19 +125,42 @@ jobs:
 
 ## Challenges
 
-### 1 |
+### 1 | File path traversal, validation of file extension with null byte bypass
 
 ### 2 | PHP Filters
+
+Utilisation du filtre 'php://filter/convert' avec base64-encode pour lire le code source PHP depuis l'include via le paramètre 'inc' :
+
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/1.png)
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/2.png)
+
+Même principe pour lire le fichier login : 
+
+![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/3.png)
+
+![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/4.png)
+
+On se rend compte de l'existance d'un fichier config.php, on applique la même technique pour le lire :
+
+![Step 5](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/5.png)
+
+![Step 6](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/6.png)
+
+Pour s'affranchir de cette vulnérabilité, il suffit d'appliquer le principe de "Never trust no one" en validant et en nettoyant les entrées utilisateurs avant de les utiliser dans des fonctions sensibles comme include(). Ou simplement ne pas utiliser include() dans ce cas précis.
+
+[Source](https://faun.pub/good-practices-how-to-sanitize-validate-and-escape-in-php-3-methods-719c9fce99d6?gi=fecb20f8fd00)
+[Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-url-contexts)
 
 ### 3 | CSRF Contournement de Jeton
 
 Création d'un compte :
 
-![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/CSRF_contournement_de_jeton/1.png)
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/3_CSRF_contournement_de_jeton/1.png)
 
 Récupération du template du formulaire de profil utilisateur :
 
-![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/CSRF_contournement_de_jeton/2.png)
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/3_CSRF_contournement_de_jeton/2.png)
 
 Payload :
 
@@ -175,7 +198,14 @@ Payload :
 
 ```
 
-![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/CSRF_contournement_de_jeton/2.png)
+Attendre le passage de l'administrateur sur la demande de contact :
+
+![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/3_CSRF_contournement_de_jeton/3.png)
+
+Pour empêcher cette vulnérabilité, il est possible d'utiliser une validation au niveau de l'input utilisateur ("Never trust no one").
+Comme "DOMPurify.sanitize(payload)"
+
+![Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
 
 ### 4 |
 
