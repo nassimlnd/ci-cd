@@ -237,7 +237,33 @@ Comme "DOMPurify.sanitize(payload)"
 
 ![Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
 
-### 4 |
+### 4 | JWT Jeton révoqué
+
+Après avoir testé plusieurs payloads, d'avoir changé d'encodage, j'ai finalement essayé de changer le token en lui même (vu que la blacklist l'identifie en dur).
+
+Recherche sur une sorte de null byte en base64 :
+
+[Recherche](https://www.reddit.com/r/ProgrammerTIL/comments/6e6vbu/til_base64_encoded_strings_have_at_the_end_when)
+
+La signature étant tronquée, il est donc possible d'ajouter des caractères "=" après le token si la longueur n'est pas divisible par 3.
+
+Récupération d'un token valide avec l'utilisateur admin :
+
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_JWT_jeton_revoque/1.png)
+
+La signature est tronquée et a pour longueur 43
+
+3 * 14 = 42
+
+3 * 15 = 45
+
+Ajout de 1 ou 2 "=" à la fin du token :
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_JWT_jeton_revoque/2.png)
+
+Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser une bibliothèque officielle pour la gestion des JWT, ou d'utiliser une white liste, ou simplement strip les "=" des tokens récupérer via les requêtes utilisateurs.
+
+[Source](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#how-to-prevent_3)
 
 ### 5 |
 
