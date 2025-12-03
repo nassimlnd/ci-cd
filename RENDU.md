@@ -451,7 +451,7 @@ et le mot de passe:
 
 ![Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/2.png)
 
-[!Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/3.png)
+![Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/3.png)
 
 ### 8 | Injection de commande - Contournement de filtre
 
