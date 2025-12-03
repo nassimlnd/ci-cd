@@ -475,6 +475,10 @@ Pour se protéger contre les vulnérabilités SSTI :
 4. **Désactiver les helpers dangereux** : Supprimer ou restreindre `with`, `each`, `lookup`
 5. **Utiliser des templates statiques pré-compilés** : Éviter la compilation dynamique basée sur les entrées utilisateur
 
+#### Screenshots
+![Screenshot1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/10_ssti/challenge_success.png)
+
+
 [Source OWASP - SSTI](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/18-Testing_for_Server-side_Template_Injection)
 
 ### 11 | Mass Assignment
