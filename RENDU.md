@@ -95,9 +95,6 @@ on:
     workflows: ["CI"]
     types:
       - completed
-    branches:
-      - main
-      - master
 
 permissions:
   contents: read
@@ -118,10 +115,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: build and push
-        id: push
         uses: docker/build-push-action@v6
         with:
-          context: .
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/ci-cd:latest
