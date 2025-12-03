@@ -126,6 +126,8 @@ jobs:
 
 ### 1 | File path traversal, validation of file extension with null byte bypass
 
+[Lien](https://portswigger.net/web-security/file-path-traversal/lab-validate-file-extension-null-byte-bypass)
+
 D'après le sujet, on se doute qu'il faut ajouter un null byte (%00) lors de l'appel d'une image.
 
 Ne pas oublier d'ajouter les images dans Burp pour les intercepter :
@@ -149,6 +151,8 @@ Pour se protéger contre cette vulnérabilité, il faut empêcher les caractère
 [Source](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
 
 ### 2 | PHP Filters
+
+[Lien](https://www.root-me.org/fr/Challenges/Web-Serveur/PHP-Filters)
 
 Utilisation du filtre 'php://filter/convert' avec base64-encode pour lire le code source PHP depuis l'include via le paramètre 'inc' :
 
@@ -181,6 +185,8 @@ Pour s'affranchir de cette vulnérabilité, il suffit d'appliquer le principe de
 [Source](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-url-contexts)
 
 ### 3 | CSRF Contournement de Jeton
+
+[Lien](https://www.root-me.org/fr/Challenges/Web-Client/CSRF-contournement-de-jeton)
 
 Création d'un compte :
 
@@ -247,6 +253,8 @@ Comme "DOMPurify.sanitize(payload)".
 
 ### 4 | CSRF where token is not tied to user session
 
+[Lien](https://portswigger.net/web-security/csrf/bypassing-token-validation/lab-token-not-tied-to-user-session)
+
 Capture de la requête de mise à jour de l'email dans Burp :
 
 ![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_CSRF_where_token_id_not_tied_to_user_session/1.png)
@@ -307,6 +315,8 @@ Dans la partie "Body", on applique ce code récupéré depuis la page de mise à
 
 ### 6 | JWT Jeton révoqué
 
+[Lien](https://www.root-me.org/fr/Challenges/Web-Serveur/JWT-Jeton-revoque)
+
 Après avoir testé plusieurs payloads, d'avoir changé d'encodage, j'ai finalement essayé de changer le token en lui même (vu que la blacklist l'identifie en dur).
 
 Recherche sur une sorte de null byte en base64 :
@@ -317,7 +327,7 @@ La signature étant tronquée, il est donc possible d'ajouter des caractères "=
 
 Récupération d'un token valide avec l'utilisateur admin :
 
-![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_JWT_jeton_revoque/1.png)
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/6_JWT_jeton_revoque/1.png)
 
 La signature est tronquée et a pour longueur 43
 
@@ -327,7 +337,7 @@ La signature est tronquée et a pour longueur 43
 
 Ajout de 1 ou 2 "=" à la fin du token :
 
-![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/4_JWT_jeton_revoque/2.png)
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/6_JWT_jeton_revoque/2.png)
 
 Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser une bibliothèque officielle pour la gestion des JWT, ou d'utiliser une liste blanche, ou simplement supprimer les "=" des tokens récupérés via les requêtes utilisateur.
 
@@ -335,13 +345,36 @@ Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser u
 
 ### 7 |
 
-### 8 |
+### 8 | Injection de commande - Contournement de filtre
+
+[Lien](https://www.root-me.org/fr/Challenges/Web-Serveur/Injection-de-commande-Contournement-de-filtre)
+
+Il est possible de renseigner un host à ping, on peut donc essayer d'injecter une commande annexe pour l'exécuter sur le serveur cible.
+
+- Utilisation du repeater de Burp
+- Construction de la commande à executer avec curl et le flag '--data' (envoyer un fichier sur un serveur distant).
+- Utilisation d'un serveur Interactsh pour recevoir le contenu du fichier.
+- Echapement des espaces avec '%20'
+- Essaie de plusiers caractères ASCII encodés pour chainer ([ ;, &, | ])
+- Finalement, le caractère '\n' encodé en '%0a' fonctionne.
+
+![Step 1](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/1.png)
+
+![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/2.png)
+
+![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/3.png)
+
+![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/4.png)
+
+Pour se protéger contre cette vulnérabilité, il faudrait aussi filtrer "\n", 
 
 ### 9 |
 
 ### 10 |
 
 ### 11 | Mass Assignment
+
+[Lien](https://www.root-me.org/fr/Challenges/Web-Serveur/API-Mass-Assignment)
 
 Le Mass Assignment est une vulnérabilité qui survient lorsqu'une application permet la modification de propriétés d'objets qui ne devraient pas être modifiables par l'utilisateur (comme le rôle ou les permissions).
 
